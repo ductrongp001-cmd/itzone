@@ -12,7 +12,7 @@ function renderContent(content: string): (string | { type: string; text: string 
     if (trimmed.startsWith("[TIP:")) {
       return { type: "tip", text: trimmed.replace("[TIP:", "").replace("]", "").trim() };
     }
-    if (trimmed.startsWith("•") && trimmed.includes("Ctrl+") || trimmed.includes("F12") || trimmed.includes("F5") || trimmed.includes("F7")) {
+    if (trimmed.startsWith("•") && (trimmed.includes("Ctrl+") || trimmed.includes("F12") || trimmed.includes("F5") || trimmed.includes("F7"))) {
       return { type: "shortcut", text: line };
     }
     if (trimmed.startsWith("📍") || trimmed.startsWith("📌") || trimmed.startsWith("⚠️")) {
@@ -32,6 +32,7 @@ export default function LessonPage() {
   const [score, setScore] = useState(0);
   const [loading, setLoading] = useState(true);
   const [lessons, setLessons] = useState<Lesson[]>([]);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     if (!id) return;
@@ -39,13 +40,17 @@ export default function LessonPage() {
     setAnswers({});
     setScore(0);
     setLoading(true);
+    setError("");
     Promise.all([
       api.get<Lesson>(`/lessons/${id}`),
       api.get<Question[]>(`/questions?lesson_id=${id}`),
     ]).then(([les, qs]) => {
       setLesson(les);
       setQuestions(qs);
-      api.get<Lesson[]>(`/categories/${les.category_id}/lessons`).then((l) => setLessons(l));
+      api.get<Lesson[]>(`/categories/${les.category_id}/lessons`).then((l) => setLessons(l)).catch(() => {});
+      setLoading(false);
+    }).catch(() => {
+      setError("Không thể tải bài học");
       setLoading(false);
     });
   }, [id]);
@@ -80,6 +85,7 @@ export default function LessonPage() {
   };
 
   if (loading) return <div className="loading">Đang tải...</div>;
+  if (error) return <div className="page"><p className="empty">{error}</p></div>;
   if (!lesson) return <div className="empty">Không tìm thấy bài học</div>;
 
   const allAnswered = questions.every((q) => answers[q.id] !== undefined);

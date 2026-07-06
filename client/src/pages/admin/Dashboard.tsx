@@ -3,9 +3,10 @@ import { api } from "../../api";
 
 export default function Dashboard() {
   const [stats, setStats] = useState<any>(null);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    api.get("/admin/stats").then(setStats).catch(() => {});
+    api.get("/admin/stats").then(setStats).catch(() => setError("Không thể tải thống kê"));
   }, []);
 
   const cards = stats ? [
@@ -18,7 +19,9 @@ export default function Dashboard() {
   return (
     <div>
       <h1>Dashboard</h1>
-      {stats ? (
+      {error ? (
+        <p className="empty">{error}</p>
+      ) : stats ? (
         <div className="admin-cards">
           {cards.map((card) => (
             <div key={card.label} className="admin-card" style={{ borderTopColor: card.color }}>

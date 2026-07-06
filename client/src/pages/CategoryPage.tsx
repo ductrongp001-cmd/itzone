@@ -13,6 +13,7 @@ export default function CategoryPage() {
   const [category, setCategory] = useState<Category | null>(null);
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     if (!id) return;
@@ -23,10 +24,14 @@ export default function CategoryPage() {
       setCategory(cat);
       setLessons(less);
       setLoading(false);
+    }).catch(() => {
+      setError("Không thể tải thông tin chứng chỉ");
+      setLoading(false);
     });
   }, [id]);
 
   if (loading) return <div className="loading">Đang tải...</div>;
+  if (error) return <div className="page"><p className="empty">{error}</p></div>;
   if (!category) return <div className="empty">Không tìm thấy chứng chỉ</div>;
 
   return (

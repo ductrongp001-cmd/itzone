@@ -11,15 +11,20 @@ const certColors: Record<string, string> = {
 export default function CategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     api.get<Category[]>("/categories").then((data) => {
       setCategories(data);
       setLoading(false);
+    }).catch(() => {
+      setError("Không thể tải danh sách chứng chỉ");
+      setLoading(false);
     });
   }, []);
 
   if (loading) return <div className="loading">Đang tải...</div>;
+  if (error) return <div className="page"><p className="empty">{error}</p></div>;
 
   return (
     <div className="page">

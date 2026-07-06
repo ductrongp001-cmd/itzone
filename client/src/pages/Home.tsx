@@ -11,16 +11,19 @@ const certColors: Record<string, string> = {
 export default function Home() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     api.get<Category[]>("/categories").then((data) => {
       setCategories(data);
       setLoading(false);
+    }).catch(() => {
+      setError("Không thể tải danh sách chứng chỉ");
+      setLoading(false);
     });
   }, []);
 
   if (loading) return <div className="loading">Đang tải...</div>;
-
   return (
     <div>
       <section className="hero-section">
@@ -33,6 +36,9 @@ export default function Home() {
 
       <section className="features-section">
         <h2>Chứng chỉ</h2>
+        {error ? (
+          <p className="empty">{error}</p>
+        ) : (
         <div className="features-grid">
           {categories.map((cat) => (
             <Link
@@ -47,6 +53,7 @@ export default function Home() {
             </Link>
           ))}
         </div>
+        )}
       </section>
 
       <section className="levels-section">
