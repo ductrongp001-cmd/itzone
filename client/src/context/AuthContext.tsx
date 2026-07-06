@@ -44,9 +44,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [user]);
 
   const login = async (email: string, password: string) => {
-    const res = await api.post<{ success: boolean; token: string; user: User }>("/auth/login", { email, password });
+    const res = await api.post<{ success: boolean; token?: string; user: User }>("/auth/login", { email, password });
     if (!res.success) throw new Error("Sai email hoặc mật khẩu");
-    localStorage.setItem("itzone_token", res.token);
+    if (res.token) localStorage.setItem("itzone_token", res.token);
     setUser(res.user);
   };
 
