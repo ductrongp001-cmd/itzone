@@ -24,6 +24,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   });
 
   useEffect(() => {
+    const token = localStorage.getItem("itzone_token");
+    if (!token) return;
+    api.get<{ success: boolean; user: User }>("/auth/verify").then((res) => {
+      if (res.success) {
+        setUser(res.user);
+        localStorage.setItem("itzone_user", JSON.stringify(res.user));
+      }
+    }).catch(() => {
+      localStorage.removeItem("itzone_token");
+      localStorage.removeItem("itzone_user");
+      setUser(null);
+    });
+  }, []);
+
+  useEffect(() => {
     if (user) localStorage.setItem("itzone_user", JSON.stringify(user));
     else localStorage.removeItem("itzone_user");
   }, [user]);
