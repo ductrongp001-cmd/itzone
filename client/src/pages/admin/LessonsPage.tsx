@@ -1,15 +1,16 @@
 import { useEffect, useState } from "react";
 import { api } from "../../api";
+import type { AdminLesson, AdminCategory } from "../../types";
 
 export default function LessonsPage() {
-  const [lessons, setLessons] = useState<any[]>([]);
-  const [cats, setCats] = useState<any[]>([]);
+  const [lessons, setLessons] = useState<AdminLesson[]>([]);
+  const [cats, setCats] = useState<AdminCategory[]>([]);
   const [form, setForm] = useState({ category_id: 1, title: "", content: "", order_index: 0 });
   const [editing, setEditing] = useState<number | null>(null);
 
   const fetch = async () => {
-    api.get<any[]>("/admin/lessons").then(setLessons).catch(() => {});
-    api.get<any[]>("/admin/categories").then(setCats).catch(() => {});
+    api.get<AdminLesson[]>("/admin/lessons").then(setLessons).catch(() => {});
+    api.get<AdminCategory[]>("/admin/categories").then(setCats).catch(() => {});
   };
   useEffect(() => { fetch(); }, []);
 

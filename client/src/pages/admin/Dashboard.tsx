@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { api } from "../../api";
+import type { AdminStats } from "../../types";
 
 export default function Dashboard() {
-  const [stats, setStats] = useState<any>(null);
+  const [stats, setStats] = useState<AdminStats | null>(null);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    api.get("/admin/stats").then(setStats).catch(() => setError("Không thể tải thống kê"));
+    api.get<AdminStats>("/admin/stats").then(setStats).catch(() => setError("Không thể tải thống kê"));
   }, []);
 
   const cards = stats ? [

@@ -1,3 +1,4 @@
+import bcrypt from "bcryptjs";
 import { getDb, saveDb } from "./database";
 import { initSchema } from "./schema";
 
@@ -8,6 +9,8 @@ export async function runSeed() {
 async function seed() {
   await initSchema();
   const db = await getDb();
+  const hashAdmin = await bcrypt.hash("admin123", 10);
+  const hashUser = await bcrypt.hash("user123", 10);
 
   db.run("DELETE FROM questions");
   db.run("DELETE FROM lessons");
@@ -16,9 +19,9 @@ async function seed() {
   // Seed users
   db.run("DELETE FROM users");
   db.run("INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)",
-    ["Admin", "admin@itzone.com", "admin123", "admin"]);
+    ["Admin", "admin@itzone.com", hashAdmin, "admin"]);
   db.run("INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)",
-    ["Nguyen Van A", "user@itzone.com", "user123", "user"]);
+    ["Nguyen Van A", "user@itzone.com", hashUser, "user"]);
 
   const categories = [
     { name: "MOS Word", description: "Microsoft Word - Soạn thảo văn bản chuyên nghiệp", cert: "MOS", icon: "📝", order_index: 1 },

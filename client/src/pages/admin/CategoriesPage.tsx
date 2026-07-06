@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { api } from "../../api";
+import type { AdminCategory } from "../../types";
 
 export default function CategoriesPage() {
-  const [cats, setCats] = useState<any[]>([]);
+  const [cats, setCats] = useState<AdminCategory[]>([]);
   const [form, setForm] = useState({ name: "", description: "", cert: "MOS", icon: "📁", order_index: 0 });
   const [editing, setEditing] = useState<number | null>(null);
 
-  const fetch = () => api.get<any[]>("/admin/categories").then(setCats).catch(() => {});
+  const fetch = () => api.get<AdminCategory[]>("/admin/categories").then(setCats).catch(() => {});
   useEffect(() => { fetch(); }, []);
 
   const save = async () => {

@@ -25,3 +25,27 @@ export interface Question {
   explanation: string;
   difficulty: string;
 }
+
+export interface AdminCategory extends Category {
+  id: number;
+}
+
+export interface AdminLesson extends Lesson {
+  id: number;
+  category_name?: string;
+}
+
+export interface AdminUser {
+  id: number;
+  name: string;
+  email: string;
+  role: string;
+  created_at: string;
+}
+
+export interface AdminStats {
+  categories: number;
+  lessons: number;
+  questions: number;
+  users: number;
+}
