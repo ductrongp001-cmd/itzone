@@ -22,10 +22,12 @@ app.get("/api/health", (_req, res) => {
 });
 
 const clientDist = path.join(__dirname, "../../client/dist");
-app.use(express.static(clientDist));
-app.get("*", (_req, res) => {
-  res.sendFile(path.join(clientDist, "index.html"));
-});
+if (require("fs").existsSync(clientDist)) {
+  app.use(express.static(clientDist));
+  app.get("*", (_req, res) => {
+    res.sendFile(path.join(clientDist, "index.html"));
+  });
+}
 
 async function migratePasswords() {
   const db = await getDb();
