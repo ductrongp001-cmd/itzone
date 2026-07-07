@@ -155,6 +155,7 @@ export default function LessonPage() {
           {questions.map((q, idx) => {
             let opts: string[] = [];
             try { opts = JSON.parse(q.options); } catch { opts = []; }
+            for (let i = opts.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [opts[i], opts[j]] = [opts[j], opts[i]]; }
             return (
               <div key={q.id} className="exercise-card">
                 <p className="ex-question">Câu {idx + 1}: {q.question}</p>

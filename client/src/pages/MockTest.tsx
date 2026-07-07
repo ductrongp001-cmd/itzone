@@ -144,6 +144,7 @@ export default function MockTest() {
     const q = questions[currentIdx];
     let opts: string[] = [];
     try { opts = JSON.parse(q?.options || "[]"); } catch {}
+    for (let i = opts.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [opts[i], opts[j]] = [opts[j], opts[i]]; }
     const answered = Object.keys(answers).length;
     return (
       <div className="page" style={{paddingBottom:"2rem"}}>
