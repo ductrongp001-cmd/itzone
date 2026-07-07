@@ -5,6 +5,7 @@ import { useAuth } from "../context/AuthContext";
 const links = [
   { to: "/", label: "Trang chủ" },
   { to: "/categories", label: "Chứng chỉ" },
+  { to: "/flashcard", label: "Flashcard" },
 ];
 
 export default function Navbar() {

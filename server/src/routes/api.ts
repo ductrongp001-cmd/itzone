@@ -51,6 +51,20 @@ router.get("/questions", async (req, res) => {
   res.json(parseRows(r[0]));
 });
 
+router.get("/flashcards", async (req, res) => {
+  const db = await getDb();
+  const { category_id, limit } = req.query;
+  let sql = "SELECT q.*, c.name as category_name, l.title as lesson_title FROM questions q LEFT JOIN categories c ON q.category_id = c.id LEFT JOIN lessons l ON q.lesson_id = l.id WHERE 1=1";
+  const params: any[] = [];
+  if (category_id) { sql += " AND q.category_id = ?"; params.push(category_id); }
+  sql += " ORDER BY RANDOM()";
+  const lim = parseInt(limit as string) || 20;
+  sql += " LIMIT ?";
+  params.push(lim);
+  const r = db.exec(sql, params);
+  res.json(parseRows(r[0]));
+});
+
 router.post("/questions/check", async (req, res) => {
   const db = await getDb();
   const { question_id, answer } = req.body;
