@@ -29,7 +29,8 @@ export default function MockTest() {
   const [phase, setPhase] = useState<"setup" | "test" | "result">("setup");
   const [result, setResult] = useState<{ score: number; total: number; results: any[] } | null>(null);
   const [loading, setLoading] = useState(true);
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const answersRef = useRef<Record<number, string>>({});
 
   useEffect(() => {
     api.get<Category[]>("/categories").then((data) => {
@@ -38,12 +39,17 @@ export default function MockTest() {
     });
   }, []);
 
+  useEffect(() => {
+    answersRef.current = answers;
+  }, [answers]);
+
   const startTest = async () => {
     const params = selectedCatId ? `?category_id=${selectedCatId}&limit=${questionCount}` : `?limit=${questionCount}`;
     const data = await api.get<MockQuestion[]>("/mock/questions" + params);
     if (data.length === 0) return alert("Không đủ câu hỏi!");
     setQuestions(data);
     setAnswers({});
+    answersRef.current = {};
     setCurrentIdx(0);
     setTimeLeft(timeLimit * 60);
     setPhase("test");
@@ -51,25 +57,38 @@ export default function MockTest() {
 
   useEffect(() => {
     if (phase !== "test") return;
-    timerRef.current = setInterval(() => {
+    const id = setInterval(() => {
       setTimeLeft((prev) => {
-        if (prev <= 1) { clearInterval(timerRef.current!); submitTest(); return 0; }
+        if (prev <= 1) return 0;
         return prev - 1;
       });
     }, 1000);
-    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+    return () => clearInterval(id);
   }, [phase]);
+
+  useEffect(() => {
+    if (phase !== "test" || timeLeft > 0) return;
+    doSubmit();
+  }, [timeLeft, phase]);
 
   const selectAnswer = (qId: number, ans: string) => {
     setAnswers((prev) => ({ ...prev, [qId]: ans }));
   };
 
-  const submitTest = async () => {
-    if (timerRef.current) clearInterval(timerRef.current);
-    const payload = { answers: Object.entries(answers).map(([qId, selected]) => ({ question_id: parseInt(qId), selected })) };
-    const res = await api.post<{ score: number; total: number; results: any[] }>("/mock/submit", payload);
-    setResult(res);
-    setPhase("result");
+  const doSubmit = async () => {
+    if (submitting) return;
+    setSubmitting(true);
+    try {
+      const ans = answersRef.current;
+      const payload = { answers: Object.entries(ans).map(([qId, selected]) => ({ question_id: parseInt(qId), selected })) };
+      const res = await api.post<{ score: number; total: number; results: any[] }>("/mock/submit", payload);
+      setResult(res);
+      setPhase("result");
+    } catch (e: any) {
+      alert("Lỗi: " + (e.message || "Không thể nộp bài"));
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const formatTime = (s: number) => {
@@ -148,8 +167,8 @@ export default function MockTest() {
           ))}
         </div>
         <div className="mock-submit-area">
-          <button className="mock-btn submit" onClick={submitTest}>
-            Nộp bài ({answered}/{questions.length})
+          <button className="mock-btn submit" onClick={doSubmit} disabled={submitting}>
+            {submitting ? "Đang nộp..." : `Nộp bài (${answered}/${questions.length})`}
           </button>
         </div>
       </div>
