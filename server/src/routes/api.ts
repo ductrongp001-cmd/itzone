@@ -65,6 +65,37 @@ router.get("/flashcards", async (req, res) => {
   res.json(parseRows(r[0]));
 });
 
+router.get("/mock/questions", async (req, res) => {
+  const db = await getDb();
+  const { category_id, limit } = req.query;
+  let sql = "SELECT q.id, q.question, q.options, q.difficulty, q.category_id, q.lesson_id, c.name as category_name FROM questions q LEFT JOIN categories c ON q.category_id = c.id WHERE 1=1";
+  const params: any[] = [];
+  if (category_id) { sql += " AND q.category_id = ?"; params.push(category_id); }
+  sql += " ORDER BY RANDOM()";
+  const lim = parseInt(limit as string) || 10;
+  sql += " LIMIT ?";
+  params.push(lim);
+  const r = db.exec(sql, params);
+  res.json(parseRows(r[0]));
+});
+
+router.post("/mock/submit", async (req, res) => {
+  const db = await getDb();
+  const { answers } = req.body;
+  if (!Array.isArray(answers)) return res.status(400).json({ error: "answers must be an array" });
+  const results: any[] = [];
+  let correctCount = 0;
+  for (const a of answers) {
+    const r = db.exec("SELECT id, correct_answer, explanation FROM questions WHERE id = ?", [a.question_id]);
+    if (!r.length || !r[0].values.length) continue;
+    const row = r[0].values[0];
+    const isCorrect = row[1] === a.selected;
+    if (isCorrect) correctCount++;
+    results.push({ question_id: row[0], correct: isCorrect, correct_answer: row[1], explanation: row[2] });
+  }
+  res.json({ score: correctCount, total: results.length, results });
+});
+
 router.post("/questions/check", async (req, res) => {
   const db = await getDb();
   const { question_id, answer } = req.body;

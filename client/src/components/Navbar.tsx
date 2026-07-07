@@ -6,6 +6,7 @@ const links = [
   { to: "/", label: "Trang chủ" },
   { to: "/categories", label: "Chứng chỉ" },
   { to: "/flashcard", label: "Flashcard" },
+  { to: "/mock-test", label: "Thi thử" },
 ];
 
 export default function Navbar() {
