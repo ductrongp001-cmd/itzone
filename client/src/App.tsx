@@ -10,6 +10,9 @@ import LessonPage from "./pages/LessonPage";
 import AuthPage from "./pages/AuthPage";
 import Flashcard from "./pages/Flashcard";
 import MockTest from "./pages/MockTest";
+import Progress from "./pages/Progress";
+import Search from "./pages/Search";
+import Practice from "./pages/Practice";
 import Dashboard from "./pages/admin/Dashboard";
 import UsersPage from "./pages/admin/UsersPage";
 import AdminCategoriesPage from "./pages/admin/CategoriesPage";
@@ -29,6 +32,9 @@ export default function App() {
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/flashcard" element={<Flashcard />} />
             <Route path="/mock-test" element={<MockTest />} />
+            <Route path="/progress" element={<Progress />} />
+            <Route path="/search" element={<Search />} />
+            <Route path="/practice" element={<Practice />} />
             <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
               <Route index element={<Dashboard />} />
               <Route path="users" element={<UsersPage />} />

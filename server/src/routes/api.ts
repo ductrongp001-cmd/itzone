@@ -51,6 +51,15 @@ router.get("/questions", async (req, res) => {
   res.json(parseRows(r[0]));
 });
 
+router.get("/search", async (req, res) => {
+  const db = await getDb();
+  const q = (req.query.q as string || "").toLowerCase();
+  if (!q.trim()) return res.json({ lessons: [], questions: [] });
+  const lessons = db.exec("SELECT id, title, category_id, SUBSTR(content, 1, 150) as preview FROM lessons WHERE LOWER(title) LIKE ? OR LOWER(content) LIKE ? LIMIT 10", [`%${q}%`, `%${q}%`]);
+  const questions = db.exec("SELECT q.id, q.question, q.difficulty, c.name as category_name, l.title as lesson_title FROM questions q LEFT JOIN categories c ON q.category_id = c.id LEFT JOIN lessons l ON q.lesson_id = l.id WHERE LOWER(q.question) LIKE ? OR LOWER(q.explanation) LIKE ? LIMIT 10", [`%${q}%`, `%${q}%`]);
+  res.json({ lessons: parseRows(lessons[0]), questions: parseRows(questions[0]) });
+});
+
 router.get("/flashcards", async (req, res) => {
   const db = await getDb();
   const { category_id, limit } = req.query;

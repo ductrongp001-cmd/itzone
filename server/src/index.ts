@@ -6,6 +6,7 @@ import { initSchema } from "./schema";
 import apiRoutes from "./routes/api";
 import authRoutes from "./routes/auth";
 import adminRoutes from "./routes/admin";
+import progressRoutes from "./routes/progress";
 
 const app = express();
 const PORT = parseInt(process.env.PORT || "3002");
@@ -16,6 +17,7 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api", apiRoutes);
+app.use("/api/progress", progressRoutes);
 
 app.get("/api/health", (_req, res) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });
