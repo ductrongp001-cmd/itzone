@@ -84,7 +84,9 @@ jobs:
 
       - name: Build APK
         working-directory: client/android
+        shell: bash
         run: |
+          set -o pipefail
           echo "sdk.dir=/usr/local/lib/android/sdk" > local.properties
           chmod +x gradlew
           ./gradlew assembleDebug --no-daemon --stacktrace 2>&1 | tee /tmp/gradle.log
