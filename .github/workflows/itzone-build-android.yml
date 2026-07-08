@@ -40,9 +40,6 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - name: Accept SDK licenses
-        run: yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --licenses > /dev/null 2>&1 || true
-
       - name: Build APK
         working-directory: client/android
         run: |
