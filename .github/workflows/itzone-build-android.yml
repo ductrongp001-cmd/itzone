@@ -40,11 +40,14 @@ jobs:
           distribution: temurin
           java-version: 17
 
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v2
+
       - name: Build APK
         working-directory: client/android
         run: |
           chmod +x gradlew
-          ./gradlew assembleDebug
+          ./gradlew assembleDebug --no-daemon
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
