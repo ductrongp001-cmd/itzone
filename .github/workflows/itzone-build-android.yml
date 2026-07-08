@@ -16,31 +16,32 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install dependencies
-        working-directory: client
-        run: npm ci
-
-      - name: Build web app
-        working-directory: client
-        run: npm run build
-
-      - name: Copy web assets to Android
-        working-directory: client
-        run: |
-          mkdir -p android/app/src/main/assets/public
-          cp -r dist/* android/app/src/main/assets/public/
-          echo '{"appId":"com.itzone.app","appName":"ITZone","webDir":"dist"}' > android/app/src/main/assets/capacitor.config.json
-          echo '[]' > android/app/src/main/assets/capacitor.plugins.json
-
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 17
 
+      - name: Build web app and copy to Android
+        working-directory: client
+        run: |
+          npm ci
+          npm run build
+          mkdir -p android/app/src/main/assets/public
+          cp -r dist/* android/app/src/main/assets/public/
+          echo '{"appId":"com.itzone.app","appName":"ITZone","webDir":"dist"}' > android/app/src/main/assets/capacitor.config.json
+          echo '[]' > android/app/src/main/assets/capacitor.plugins.json
+
+      - name: Set up local.properties
+        working-directory: client/android
+        run: |
+          echo "sdk.dir=/usr/local/lib/android/sdk" > local.properties
+          cat local.properties
+
       - name: Build APK
         working-directory: client/android
         run: |
           chmod +x gradlew
+          export ANDROID_HOME=/usr/local/lib/android/sdk
           export ANDROID_SDK_ROOT=/usr/local/lib/android/sdk
           ./gradlew assembleDebug
 
