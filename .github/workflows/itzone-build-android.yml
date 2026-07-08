@@ -99,4 +99,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: itzone-android
-          path: client/android/app/build/outputs/apk/debug/*.apk
+          path: |
+            client/android/app/build/outputs/**/*.apk
+            client/android/app/build/outputs/**/*.aab
+          if-no-files-found: warn
