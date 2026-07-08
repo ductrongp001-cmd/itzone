@@ -74,16 +74,25 @@ jobs:
           apply from: "cordova.variables.gradle"
           EOF
 
+      - name: Check Android structure
+        working-directory: client/android
+        run: |
+          ls -la gradlew
+          ls -la capacitor-cordova-android-plugins/ 2>/dev/null || echo "No plugins dir"
+          ls -la capacitor-cordova-android-plugins/build.gradle 2>/dev/null || echo "No plugins build.gradle"
+          cat app/capacitor.build.gradle 2>/dev/null || echo "No capacitor.build.gradle"
+
       - name: Build APK
         working-directory: client/android
         run: |
           echo "sdk.dir=/usr/local/lib/android/sdk" > local.properties
           chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon --stacktrace
+          ./gradlew assembleDebug --no-daemon --stacktrace 2>&1 | tee /tmp/gradle.log
 
       - name: Upload errors
         if: failure()
         run: |
+          tail -100 /tmp/gradle.log | tee /dev/stderr
           URL=$(tail -100 /tmp/gradle.log | curl -s --data-binary @- https://paste.rs)
           echo "::notice::Gradle error at $URL"
 
