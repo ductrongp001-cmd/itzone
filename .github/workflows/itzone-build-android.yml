@@ -22,20 +22,72 @@ jobs:
 
       - uses: android-actions/setup-android@v2
 
-      - name: Build
+      - name: Build web app
         working-directory: client
         run: |
           npm ci && npm run build
           mkdir -p android/app/src/main/assets/public
           cp -r dist/* android/app/src/main/assets/public/
-          cd android && chmod +x gradlew && ./gradlew assembleDebug
+          echo '{"appId":"com.itzone.app","appName":"ITZone","webDir":"dist"}' > android/app/src/main/assets/capacitor.config.json
+          echo '[]' > android/app/src/main/assets/capacitor.plugins.json
+
+      - name: Create cordova plugins
+        working-directory: client/android
+        run: |
+          mkdir -p capacitor-cordova-android-plugins/src/main/libs
+          cat > capacitor-cordova-android-plugins/cordova.variables.gradle << 'EOF'
+          ext {
+            cdvMinSdkVersion = project.hasProperty('minSdkVersion') ? rootProject.ext.minSdkVersion : 24
+            cdvPluginPostBuildExtras = []
+            cordovaConfig = [:]
+          }
+          EOF
+          cat > capacitor-cordova-android-plugins/build.gradle << 'EOF'
+          ext {
+            androidxAppCompatVersion = project.hasProperty('androidxAppCompatVersion') ? rootProject.ext.androidxAppCompatVersion : '1.7.1'
+            cordovaAndroidVersion = project.hasProperty('cordovaAndroidVersion') ? rootProject.ext.cordovaAndroidVersion : '14.0.1'
+          }
+          buildscript {
+            repositories { google(); mavenCentral() }
+            dependencies { classpath 'com.android.tools.build:gradle:8.13.0' }
+          }
+          apply plugin: 'com.android.library'
+          android {
+            namespace = "capacitor.cordova.android.plugins"
+            compileSdk = project.hasProperty('compileSdkVersion') ? rootProject.ext.compileSdkVersion : 34
+            defaultConfig {
+              minSdkVersion project.hasProperty('minSdkVersion') ? rootProject.ext.minSdkVersion : 24
+              targetSdkVersion project.hasProperty('targetSdkVersion') ? rootProject.ext.targetSdkVersion : 34
+              versionCode 1; versionName "1.0"
+            }
+            compileOptions {
+              sourceCompatibility JavaVersion.VERSION_21
+              targetCompatibility JavaVersion.VERSION_21
+            }
+          }
+          repositories { google(); mavenCentral() }
+          dependencies {
+            implementation fileTree(dir: 'src/main/libs', include: ['*.jar'])
+            implementation "androidx.appcompat:appcompat:$androidxAppCompatVersion"
+            implementation "org.apache.cordova:framework:$cordovaAndroidVersion"
+          }
+          apply from: "cordova.variables.gradle"
+          EOF
+
+      - name: Build APK
+        working-directory: client/android
+        run: |
+          echo "sdk.dir=/usr/local/lib/android/sdk" > local.properties
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon --stacktrace
+
+      - name: Upload errors
+        if: failure()
+        run: |
+          URL=$(tail -100 /tmp/gradle.log | curl -s --data-binary @- https://paste.rs)
+          echo "::notice::Gradle error at $URL"
 
       - uses: actions/upload-artifact@v4
         with:
           name: itzone-android
           path: client/android/app/build/outputs/apk/debug/*.apk
-
-      - name: Show APK info
-        if: always()
-        run: |
-          ls -la client/android/app/build/outputs/apk/debug/ 2>/dev/null
