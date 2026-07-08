@@ -74,14 +74,6 @@ jobs:
           apply from: "cordova.variables.gradle"
           EOF
 
-      - name: Check Android structure
-        working-directory: client/android
-        run: |
-          ls -la gradlew
-          ls -la capacitor-cordova-android-plugins/ 2>/dev/null || echo "No plugins dir"
-          ls -la capacitor-cordova-android-plugins/build.gradle 2>/dev/null || echo "No plugins build.gradle"
-          cat app/capacitor.build.gradle 2>/dev/null || echo "No capacitor.build.gradle"
-
       - name: Build APK
         working-directory: client/android
         shell: bash
@@ -101,7 +93,5 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: itzone-android
-          path: |
-            client/android/app/build/outputs/**/*.apk
-            client/android/app/build/outputs/**/*.aab
-          if-no-files-found: warn
+          path: client/android/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
